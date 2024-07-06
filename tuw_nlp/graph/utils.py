@@ -58,8 +58,6 @@ class GraphFormulaPatternMatcher:
 
     @staticmethod
     def node_matcher(n1, n2, flags):
-        #print(f"n1 {n1}")
-        #print(f"n2 {n2}")
         logger.debug(f"matchig these: {n1}, {n2}")
         if n1["name"] is None or n2["name"] is None:
             return True
@@ -68,15 +66,6 @@ class GraphFormulaPatternMatcher:
         if ( re.match(rf"\b({n2['name']})\b", n1["name"], flags)
                         or n2["name"] == n1["name"] ):
             name_check = True
-
-        #print(f"Name check: {name_check}")
-        #print(f"Entity in n2 {'entity' in n2}")
-        #print(f"Entity in n1 {'entity' in n1}")
-        #if ('entity' in n1 and 'entity' in n2):
-        #    print(f"Entity n1 == n2 {n1['entity'] == n2['entity']}")
-        #print(f"Entity not in either {'entity' not in n2 and 'entity' not in n2}")
-        #print(f"Entity check: {('entity' in n2 and 'entity' in n1 and n1['entity'] == n2['entity']) or ('entity' not in n2 and 'entity' not in n2)}")
-
 
         return (
             True
@@ -176,8 +165,9 @@ class GraphFormulaPatternMatcher:
         if not possible:
             return False
         for n1, n2 in product(node1_matches, node2_matches):
-            n1_root = [n for n, d in n1.in_degree() if d == 0][0]
-            n2_root = [n for n, d in n2.in_degree() if d == 0][0]
+            # This is a temporary fix. Should be d==0 for both.
+            n1_root = [n for n, d in n1.in_degree() if d < 2][0]
+            n2_root = [n for n, d in n2.in_degree() if d < 2][0]
             try:
                 if nx.shortest_path_length(graph, n1_root, n2_root) <= max_dist:
                     subgraphs.append(nx.compose(n1, n2))
@@ -196,11 +186,8 @@ class GraphFormulaPatternMatcher:
         if not possible:
             return False
         for n1, n2 in product(node1_matches, node2_matches):
-            #print(f"{n1.nodes[0]}, {graph.nodes}, {n1.edges}")
-            #print(f"{n2.nodes}, {graph.nodes}, {n2.edges}")
-            #print(n1.in_degree())
-            #print(n2.in_degree())
-            n1_root = [n for n, d in n1.in_degree() if d < 2][0]
+            # This is a temporary fix. Should be d==0 for both.
+            n1_root = [n for n, d in n1.in_degree() if d ][0]
             n2_root = [n for n, d in n2.in_degree() if d < 2][0]
             try:
                 if nx.has_path(graph, n1_root, n2_root):
@@ -383,11 +370,8 @@ def graph_to_pn(graph):
             nodes[node] = (pn_id, name)
             pn_nodes.append((pn_id, ":instance", name))
 
-    #print(nodes)
-    #print("Entities:")
     for node in graph.nodes():
         if "entity" in graph.nodes[node]:
-            #print(f"Node: {node}, Node in graph: {graph.nodes[node]}")
             entity_num = graph.nodes[node]["entity"]
             if entity_num not in entity_nodes:
                 node_id = f"entity_{len(entity_nodes)}"
@@ -395,10 +379,7 @@ def graph_to_pn(graph):
                 nodes[node_id] = (pn_id, entity_num)
                 entity_nodes[entity_num] = pn_id
                 pn_nodes.append((pn_id, ":instance", entity_num))
-                #print(f"Inserting node ({pn_id}, ':instance', {entity_num})")
             pn_edges.append((nodes[node][0], f':entity', entity_nodes[entity_num]))
-            #print(f"Inserting edge {(nodes[node][0], f':entity', entity_nodes[entity_num])}")
-    #print(nodes)
 
     G = pn.Graph(pn_nodes + pn_edges)
 
