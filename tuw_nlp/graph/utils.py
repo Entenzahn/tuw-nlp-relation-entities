@@ -375,7 +375,7 @@ def graph_to_pn(graph):
             entity_num = graph.nodes[node]["entity"]
             if entity_num not in entity_nodes:
                 node_id = f"entity_{len(entity_nodes)}"
-                pn_id = f"entity_{node_id}"
+                pn_id = node_id
                 nodes[node_id] = (pn_id, entity_num)
                 entity_nodes[entity_num] = pn_id
                 pn_nodes.append((pn_id, ":instance", entity_num))
