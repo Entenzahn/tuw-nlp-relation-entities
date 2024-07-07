@@ -187,7 +187,7 @@ class GraphFormulaPatternMatcher:
             return False
         for n1, n2 in product(node1_matches, node2_matches):
             # This is a temporary fix. Should be d==0 for both.
-            n1_root = [n for n, d in n1.in_degree() if d ][0]
+            n1_root = [n for n, d in n1.in_degree() if d < 2][0]
             n2_root = [n for n, d in n2.in_degree() if d < 2][0]
             try:
                 if nx.has_path(graph, n1_root, n2_root):
